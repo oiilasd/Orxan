@@ -1,0 +1,37 @@
+import streamlit as st
+from transformers import MarianMTModel, MarianTokenizer
+
+# Function to translate text
+def translate_text(text):
+    try:
+        model_name = "Helsinki-NLP/opus-mt-en-de"  # We can change model
+        tokenizer = MarianTokenizer.from_pretrained(model_name)
+        model = MarianMTModel.from_pretrained(model_name)
+
+        translated = model.generate(**tokenizer.prepare_seq2seq_batch([text], return_tensors="pt"))
+        translated_text = tokenizer.decode(translated[0], skip_special_tokens=True)
+
+        return translated_text
+
+    except Exception as e:
+        st.error(f"Error translating text: {e}")
+        return None
+
+# App title and description
+st.title("Translation App")
+st.write("This app translates text from English to German using MarianMT.")
+
+# Text input area for English text
+input_text = st.text_area("Enter text in English")
+
+# Translate button
+if st.button("Translate"):
+    if input_text:
+        # Translate the text
+        translated_text = translate_text(input_text)
+
+        if translated_text:
+            st.write("Translated Text:")
+            st.write(translated_text)
+    else:
+        st.warning("Please enter text to translate.")
